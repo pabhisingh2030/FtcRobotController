@@ -1200,10 +1200,14 @@ class Line extends OpMode {
 
     @Override
     public void start() {
-        follower.setStartingPose(new Pose(72, 72));
+        telemetry.addData("X", "%.2f", follower.getPose().getX());
+        telemetry.addData("Y", "%.2f", follower.getPose().getY());
+        telemetry.update();
+
+        follower.setStartingPose(new Pose(0, 0));
         follower.activateAllPIDFs();
 
-        Path path = new Path(new BezierLine(new Pose(72, 72), new Pose(DISTANCE + 72, 72)));
+        Path path = new Path(new BezierLine(new Pose(0, 0), new Pose(DISTANCE, 0)));
         path.setConstantHeadingInterpolation(0);
         follower.followPath(path);
         pathStarted = true;
@@ -1211,11 +1215,15 @@ class Line extends OpMode {
 
     @Override
     public void loop() {
+        telemetry.addData("Entering Loop", "...");
         follower.update();
         drawCurrentAndHistory();
 
         if (pathStarted && !follower.isBusy()) {
-            requestOpModeStop();
+            telemetry.addData("X", "%.2f", follower.getPose().getX());
+            telemetry.addData("Y", "%.2f", follower.getPose().getY());
+            telemetry.update();
+            //requestOpModeStop();
         }
 
         telemetryM.update(telemetry);
@@ -1306,9 +1314,9 @@ class CentripetalTuner extends OpMode {
  */
 class Triangle extends OpMode {
 
-    private final Pose startPose = new Pose(72, 72, Math.toRadians(0));
-    private final Pose interPose = new Pose(24 + 72, -24 + 72, Math.toRadians(90));
-    private final Pose endPose = new Pose(24 + 72, 24 + 72, Math.toRadians(45));
+    private final Pose startPose = new Pose(0, 0, Math.toRadians(0));
+    private final Pose interPose = new Pose(20, -20, Math.toRadians(0));
+    private final Pose endPose = new Pose(20, 20, Math.toRadians(0));
 
     private PathChain triangle;
 
@@ -1360,7 +1368,7 @@ class Triangle extends OpMode {
 
 /**
  * This is the Circle autonomous OpMode. It runs the robot in a PathChain that's actually not quite
- * a circle, but some Bezier curves that have control points set essentially in a square. However,
+ * a circle, but some Bézier curves that have control points set essentially in a square. However,
  * it turns enough to tune your centripetal force correction and some of your heading. Some lag in
  * heading is to be expected.
  *
