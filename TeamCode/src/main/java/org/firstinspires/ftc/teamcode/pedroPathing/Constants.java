@@ -16,10 +16,48 @@ import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 public class Constants {
 
     public static FollowerConstants followerConstants = new FollowerConstants()
-            .mass(2)
-            .translationalPIDFCoefficients(new PIDFCoefficients(0.03, 0, 0, 0.015))
-            .headingPIDFCoefficients(new PIDFCoefficients(0.8, 0, 0, 0.01))
-            .drivePIDFCoefficients(new FilteredPIDFCoefficients(0.1, 0, 0.00035, 0.6, 0.015));
+            .mass(5.533827)
+            .translationalPIDFCoefficients(new PIDFCoefficients(
+                    0.01,   // was 0.03 — much lower for lighter robot
+                    0,
+                    0.005,  // add kD to dampen oscillation
+                    0.008   // was 0.015
+            ))
+            .translationalPIDFSwitch(4)
+            .secondaryTranslationalPIDFCoefficients(new PIDFCoefficients(
+                    0.2,    // fine correction near endpoint
+                    0,
+                    0.008,  // damping
+                    0.0003
+            ))
+            .headingPIDFCoefficients(new PIDFCoefficients(
+                    0.3,    // was 0.8 — way too aggressive for lighter robot
+                    0,
+                    0.02,   // add damping
+                    0.005
+            ))
+            .secondaryHeadingPIDFCoefficients(new PIDFCoefficients(
+                    1.0,    // was 2.5
+                    0,
+                    0.05,
+                    0.0003
+            ))
+            .drivePIDFCoefficients(new FilteredPIDFCoefficients(
+                    0.04,   // was 0.1
+                    0,
+                    0.0001, // was 0.00035
+                    0.6,
+                    0.008   // was 0.015
+            ))
+            .secondaryDrivePIDFCoefficients(new FilteredPIDFCoefficients(
+                    0.01,
+                    0,
+                    0.000002,
+                    0.6,
+                    0.005
+            ))
+            .drivePIDFSwitch(15)
+            .centripetalScaling(0.0003);
 
     public static MecanumConstants driveConstants = new MecanumConstants()
             .maxPower(0.8)
@@ -41,15 +79,17 @@ public class Constants {
             .forwardEncoderDirection(GoBildaPinpointDriver.EncoderDirection.FORWARD)
             .strafeEncoderDirection(GoBildaPinpointDriver.EncoderDirection.REVERSED);
     public static PathConstraints pathConstraints = new PathConstraints(
-            0.995,  // tValueConstraint
-            0.1,    // velocityConstraint — how slow before "done"
-            0.1,    // translationalConstraint — inches of error allowed
-            0.009,  // headingConstraint — radians of error allowed
-            500,    // timeoutConstraint — ms, forces completion (increase this!)
-            1.25,   // brakingStrength
-            10,     // BEZIER_CURVE_SEARCH_LIMIT — leave at 10
-            1       // brakingStart
-    );    public static Follower createFollower(HardwareMap hardwareMap) {
+            0.995,
+            4.0,
+            2.5,
+            0.05,
+            3000,
+            1.5,    // was 1.25 — stronger braking force
+            10,
+            0.6     // was 0.8 — start braking much earlier (60% through path)
+    );
+
+    public static Follower createFollower(HardwareMap hardwareMap) {
         return new FollowerBuilder(followerConstants, hardwareMap)
                 .pinpointLocalizer(localizerConstants) // Pinpoint handles IMU too
                 .pathConstraints(pathConstraints)
